@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:numberpicker/numberpicker.dart';
+
+import 'bloc/get_dogs_bloc.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,25 +34,41 @@ class _HomePageState extends State<HomePage> {
                       print(_currentVal);
                     }),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    BlocProvider.of<GetDogsBloc>(context).add(
+                      GetDataEvent(count: _currentVal),
+                    );
+                  },
                   child: const Text('get image'),
                 ),
               ],
             ),
             const SizedBox(height: 25),
             Expanded(
-              child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: 5,
-                  itemBuilder: (context, index) => Padding(
+              child: BlocBuilder<GetDogsBloc, GetDogsState>(
+                builder: (context, state) {
+                  if (state is GetDogsSuccess) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: state.model.message?.length,
+                      itemBuilder: (context, index) => Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Container(
                           height: 200,
                           decoration: const BoxDecoration(
                             color: Colors.green,
                           ),
+                          child: Image.network(
+                            state.model.message?[index] ?? '',
+                            fit: BoxFit.fill,
+                          ),
                         ),
-                      )),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             )
           ],
         ),
